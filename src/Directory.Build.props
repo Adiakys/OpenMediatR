@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <!-- NuGet Package Info -->
+        <TargetFramework>net8.0</TargetFramework>
         <PackageId>$(MSBuildProjectName)</PackageId>
         <Version>0.0.1</Version>
         <Authors>Andrea Ficarra</Authors>
