@@ -17,7 +17,12 @@ public class DependencyInjectionTests
 
         services.FirstOrDefault(x =>
                 x.ServiceType == typeof(IRequestHandler<TestRequest, string>) &&
-                x.ImplementationType == typeof(TestRequestHandler))
+                x.ImplementationType == typeof(TestHandler))
+            .Should().NotBeNull();
+        
+        services.FirstOrDefault(x =>
+                x.ServiceType == typeof(INotificationHandler<TestNotification>) &&
+                x.ImplementationType == typeof(TestHandler))
             .Should().NotBeNull();
     }
 }
