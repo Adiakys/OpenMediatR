@@ -4,8 +4,8 @@ namespace OpenMediatR;
 
 internal sealed class MediatR : IMediatR
 {
-    private ISender? Sender;
-    private IPublisher Publisher;
+    private ISender? _sender;
+    private IPublisher? _publisher;
     
     private readonly IServiceProvider _services;
 
@@ -16,13 +16,13 @@ internal sealed class MediatR : IMediatR
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        Sender ??= _services.GetRequiredService<ISender>();
-        return Sender.Send(request, cancellationToken);
+        _sender ??= _services.GetRequiredService<ISender>();
+        return _sender.Send(request, cancellationToken);
     }
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
     {
-        Publisher ??= _services.GetRequiredService<IPublisher>();
-        return Publisher.Publish(notification, cancellationToken);
+        _publisher ??= _services.GetRequiredService<IPublisher>();
+        return _publisher.Publish(notification, cancellationToken);
     }
 }
