@@ -1,18 +1,25 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using OpenMediatR.NotificationSinks;
 
 namespace OpenMediatR;
 
 public static partial class DependencyInjection
 {
-    private static readonly Dictionary<Type, Type> OrphanTypes = [];
     private static bool FirstConfig { get; set; } = false;
     
     public static IServiceCollection AddOpenMediatR(this IServiceCollection services, Action<OpenMediatRBuilder> builder)
     {
         if (FirstConfig is false)
         {
+            
             services.AddTransient<ISender, OpenMediatRSender>();
+            
+            services.AddTransient<IPublisher, OpenMediatRPublisher>();
+            services.AddTransient<INotificationSink, InAppNotificationSink>();
+            
+            services.AddTransient<IMediatR, MediatR>();
+            
             FirstConfig = true;
         }
         
@@ -40,7 +47,7 @@ public static partial class DependencyInjection
                 continue;
             }
             
-            builder.ConfigureService(type, OrphanTypes);
+            builder.ConfigureService(type);
         }
         
         return builder;

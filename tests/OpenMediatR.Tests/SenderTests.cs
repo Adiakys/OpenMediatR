@@ -13,7 +13,7 @@ public class SenderTests
         var services = new Mock<IServiceProvider>();
 
         services.Setup(x => x.GetService(typeof(IRequestHandler<TestRequest, string>)))
-            .Returns(new TestRequestHandler());
+            .Returns(new TestHandler());
         
         var sender = new OpenMediatRSender(services.Object);
         

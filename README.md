@@ -1,8 +1,8 @@
 # OpenMediatR
 
-**OpenMediatR** is a lightweight, open-source alternative to the popular [MediatR](https://github.com/jbogard/MediatR) library. It provides simple in-process messaging with support for `IRequest`/`IRequestHandler` patterns, aiming for clarity, minimalism, and zero external dependencies.
+**OpenMediatR** is a lightweight, open-source alternative to the popular [MediatR](https://github.com/jbogard/MediatR) library. It provides simple in-process messaging with support for `IRequest`/`IRequestHandler` and `INotification`/`INotificationHandler` patterns, aiming for clarity, minimalism, and zero external dependencies.
 
-> ⚠️ **Preview Version:** This is version `0.0.1`, an early preview release intended for testing and feedback. APIs and structure may change.
+> ⚠️ **Preview Version:** This is version `0.0.2`, an early preview release intended for testing and feedback. APIs and structure may change.
 
 ![OpenMediatR](icon.png)
 
@@ -27,7 +27,8 @@ Because messaging should be simple, open, and yours to control — without magic
 
 ## 🧠 How It Works
 
-OpenMediatR allows you to define requests and handlers:
+
+### Requests
 
 ```csharp
 // Define a request
@@ -41,22 +42,46 @@ public class PingHandler : IRequestHandler<Ping, string>
 }
 ```
 
-And then use `ISender` to dispatch:
+### Notifications
+
+```csharp
+// Define a notification
+public class Alert : INotification
+{
+    public string Message { get; set; }
+}
+
+// Implement a handler
+public class AlertHandler : INotificationHandler<Alert>
+{
+    public Task Handle(Alert notification, CancellationToken cancellationToken)
+    {
+        Console.WriteLine(notification.Message);
+        return Task.CompletedTask;
+    }
+}
+```
+
+### Dispatching
 
 ```csharp
 public class SomeService
 {
     private readonly ISender _sender;
+    private readonly IPublisher _publisher;
 
-    public SomeService(ISender sender)
+    public SomeService(ISender sender, IPublisher publisher)
     {
         _sender = sender;
+        _publisher = publisher;
     }
 
     public async Task Run()
     {
         var response = await _sender.Send(new Ping());
         Console.WriteLine(response); // "Pong"
+
+        await _publisher.Publish(new Alert { Message = "Something happened!" });
     }
 }
 ```
@@ -65,9 +90,9 @@ public class SomeService
 
 ## 📌 Roadmap
 
-- [ ] Pipeline behaviors
-- [ ] Request validators
-- [ ] Notification support (like `INotification`)
+- [x] Notification support (`INotification`)
+- [ ] Pipeline behaviors (`IRequestPipeline<,>`)
+- [ ] Request validators (`IRequestValidator<>`)
 - [ ] Custom behaviors and decorators
 - [ ] NuGet packaging and CI/CD
 - [ ] Performance benchmarks
