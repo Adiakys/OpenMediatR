@@ -3,15 +3,14 @@
         <!-- NuGet Package Info -->
         <TargetFramework>net8.0</TargetFramework>
         <PackageId>$(MSBuildProjectName)</PackageId>
-        <Version>0.0.1</Version>
+        <Version>0.0.1-alpha</Version>
         <Authors>Andrea Ficarra</Authors>
         <Description>A FREE alternative to MediatR library.</Description>
         <RepositoryUrl>https://github.com/Adiakys/OpenMediatR</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageTags>OpenMediatR;dotnet;library;MediatR;Open;Free;Mediator</PackageTags>
-        
-        <!-- Package Icon -->
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         
         <!-- Build and Publish Settings -->
