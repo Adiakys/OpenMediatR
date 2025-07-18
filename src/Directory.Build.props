@@ -1,0 +1,30 @@
+<Project>
+    <PropertyGroup>
+        <!-- NuGet Package Info -->
+        <PackageId>$(MSBuildProjectName)</PackageId>
+        <Version>0.0.1</Version>
+        <Authors>Andrea Ficarra</Authors>
+        <Description>A FREE alternative to MediatR library.</Description>
+        <RepositoryUrl>https://github.com/Adiakys/OpenMediatR</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageTags>OpenMediatR;dotnet;library;MediatR;Open;Free;Mediator</PackageTags>
+        
+        <!-- Package Icon -->
+        <PackageIcon>icon.png</PackageIcon>
+        
+        <!-- Build and Publish Settings -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <IncludeSource>true</IncludeSource>
+        
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- Optional: Additional files for the NuGet package -->
+        <None Include="$(MSBuildThisFileDirectory)\..\LICENSE" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)\..\README.md" Pack="true" PackagePath="" />
+        <None Include="$(MSBuildThisFileDirectory)\..\icon.png" Pack="true" PackagePath="" />
+    </ItemGroup>
+</Project>

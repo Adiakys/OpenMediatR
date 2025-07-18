@@ -1,6 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMediatR", "OpenMediatR\OpenMediatR.csproj", "{B798EC50-783F-41CA-B9C9-8B6B5DFA9897}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMediatR", "src\OpenMediatR\OpenMediatR.csproj", "{B798EC50-783F-41CA-B9C9-8B6B5DFA9897}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMediatR.Abstractions", "src\OpenMediatR.Abstractions\OpenMediatR.Abstractions.csproj", "{6424896B-85E8-4276-906A-09A4FD9B652A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{FB512448-7959-4736-B85B-6CC49DB7668D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMediatR.Tests", "tests\OpenMediatR.Tests\OpenMediatR.Tests.csproj", "{AD445388-45D2-4429-A781-6500740334AD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "files", "files", "{F7AF0E10-7A3E-4CF2-BA7C-52AF7806E621}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +23,16 @@ Global
 		{B798EC50-783F-41CA-B9C9-8B6B5DFA9897}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B798EC50-783F-41CA-B9C9-8B6B5DFA9897}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B798EC50-783F-41CA-B9C9-8B6B5DFA9897}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6424896B-85E8-4276-906A-09A4FD9B652A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6424896B-85E8-4276-906A-09A4FD9B652A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6424896B-85E8-4276-906A-09A4FD9B652A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6424896B-85E8-4276-906A-09A4FD9B652A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD445388-45D2-4429-A781-6500740334AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD445388-45D2-4429-A781-6500740334AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD445388-45D2-4429-A781-6500740334AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD445388-45D2-4429-A781-6500740334AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AD445388-45D2-4429-A781-6500740334AD} = {FB512448-7959-4736-B85B-6CC49DB7668D}
 	EndGlobalSection
 EndGlobal

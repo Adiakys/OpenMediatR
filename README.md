@@ -1,2 +1,2 @@
 # OpenMediatR
-An FREE alternative to MediatR library
+A FREE alternative to MediatR library
