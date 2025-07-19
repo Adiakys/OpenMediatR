@@ -52,9 +52,15 @@ public static partial class DependencyInjection
         
         return builder;
     }
-
+    
     public sealed class OpenMediatRBuilder
     {
+        public bool AutoRegisterRequestHandlers { get; set; } = true;
+        
+        public bool AutoRegisterNotificationHandlers { get; set; } = true;
+        
+        public bool AutoRegisterPipelineBehaviours { get; set; } = true;
+        
         internal IServiceCollection Services { get; private init; }
 
         internal OpenMediatRBuilder(IServiceCollection services)

@@ -91,7 +91,7 @@ public class SomeService
 ## 📌 Roadmap
 
 - [x] Notification support (`INotification`)
-- [ ] Pipeline behaviors (`IRequestPipeline<,>`)
+- [x] Pipeline behaviors (`IPipelineBehaviuor<,>`)
 - [ ] Request validators (`IRequestValidator<>`)
 - [ ] Custom behaviors and decorators
 - [ ] NuGet packaging and CI/CD
