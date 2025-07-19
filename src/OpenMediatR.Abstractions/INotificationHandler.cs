@@ -1,10 +1,6 @@
 namespace OpenMediatR;
 
-public interface INotificationHandler
-{
-}
-
-public interface INotificationHandler<in TNotification> : INotificationHandler
+public interface INotificationHandler<in TNotification>
     where TNotification : INotification
 {
     Task Handle(TNotification notification, CancellationToken cancellationToken);

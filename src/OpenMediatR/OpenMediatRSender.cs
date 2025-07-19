@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace OpenMediatR;
 
@@ -29,22 +30,17 @@ internal sealed class OpenMediatRSender : ISender
     private RequestHandlerDelegate<TResponse> ConfigurePipeline<TResponse>(IRequest<TResponse> request, RequestHandlerDelegate<TResponse> next)
     {
         var pipelineType = typeof(IPipelineBehaviour<,>).MakeGenericType(request.GetType(), typeof(TResponse));
-        var handleMethod = pipelineType.GetMethod("Handle", [request.GetType(), next.GetType(), typeof(CancellationToken)]);
-
+        var handleMethod =  pipelineType.GetMethod("Handle", [request.GetType(), typeof(RequestHandlerDelegate<TResponse>), typeof(CancellationToken)]);
+        
         if (handleMethod is null)
         {
             return next;
         }
         
-        var pipelines = _services.GetService<IEnumerable<IPipelineBehaviour>>() ?? [];
-        
+        var pipelines = _services.GetServicesOrDefault(pipelineType);
+
         foreach (var pipeline in pipelines)
         {
-            if (pipeline.GetType().ImplementsInterface<IPipelineBehaviour>(request.GetType()) is false)
-            {
-                continue;
-            }
-            
             var currentNext = next;
             next = (ct) =>
             {
