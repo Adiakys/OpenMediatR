@@ -8,7 +8,7 @@ public static partial class DependencyInjection
 {
     private static bool FirstConfig { get; set; } = false;
     
-    public static IServiceCollection AddOpenMediatR(this IServiceCollection services, Action<OpenMediatRBuilder> builder)
+    public static IServiceCollection AddOpenMediatR(this IServiceCollection services, Action<OpenMediatRServiceConfiguration> builder)
     {
         if (FirstConfig is false)
         {
@@ -23,22 +23,22 @@ public static partial class DependencyInjection
             FirstConfig = true;
         }
         
-        builder(new OpenMediatRBuilder(services));
+        builder(new OpenMediatRServiceConfiguration(services));
         
         return services;
     }
     
-    public static OpenMediatRBuilder ConfigureServicesFromAssemblies(this OpenMediatRBuilder builder, IEnumerable<Assembly> assemblies)
+    public static OpenMediatRServiceConfiguration ConfigureServicesFromAssemblies(this OpenMediatRServiceConfiguration serviceConfiguration, IEnumerable<Assembly> assemblies)
     {
         foreach (var assembly in assemblies)
         {
-            builder.ConfigureServicesFromAssembly(assembly);
+            serviceConfiguration.ConfigureServicesFromAssembly(assembly);
         }
         
-        return builder;
+        return serviceConfiguration;
     }
 
-    public static OpenMediatRBuilder ConfigureServicesFromAssembly(this OpenMediatRBuilder builder, Assembly assembly)
+    public static OpenMediatRServiceConfiguration ConfigureServicesFromAssembly(this OpenMediatRServiceConfiguration serviceConfiguration, Assembly assembly)
     {
         foreach (var type in assembly.GetTypes())
         {
@@ -47,13 +47,13 @@ public static partial class DependencyInjection
                 continue;
             }
             
-            builder.ConfigureService(type);
+            serviceConfiguration.ConfigureService(type);
         }
         
-        return builder;
+        return serviceConfiguration;
     }
     
-    public sealed class OpenMediatRBuilder
+    public sealed class OpenMediatRServiceConfiguration
     {
         public bool AutoRegisterRequestHandlers { get; set; } = true;
         
@@ -63,7 +63,7 @@ public static partial class DependencyInjection
         
         internal IServiceCollection Services { get; private init; }
 
-        internal OpenMediatRBuilder(IServiceCollection services)
+        internal OpenMediatRServiceConfiguration(IServiceCollection services)
         {
             Services = services;
         }

@@ -31,13 +31,13 @@ public class DependencyInjectionTests
             .Should().NotBeNull();
         
         services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IPipelineBehaviour) &&
-                x.ImplementationType == typeof(TestPipelineBehaviour1))
+                x.ServiceType == typeof(IPipelineBehaviour<,>) &&
+                x.ImplementationType == typeof(TestPipelineBehaviour1<,>))
             .Should().NotBeNull();
         
         services.FirstOrDefault(x =>
-                x.ServiceType == typeof(IPipelineBehaviour) &&
-                x.ImplementationType == typeof(TestPipelineBehaviour2))
+                x.ServiceType == typeof(IPipelineBehaviour<,>) &&
+                x.ImplementationType == typeof(TestPipelineBehaviour2<,>))
             .Should().NotBeNull();
     }
 }
