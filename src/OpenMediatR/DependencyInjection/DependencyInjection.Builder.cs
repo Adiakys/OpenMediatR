@@ -6,22 +6,27 @@ public static partial class DependencyInjection
 {
     internal static readonly Type RequestHandlerType = typeof(IRequestHandler<,>);
     internal static readonly Type NotificationHandlerType = typeof(INotificationHandler<>);
-    internal static readonly Type PipelineBehaviourType = typeof(IPipelineBehaviour<,>);
+    internal static readonly Type PipelineBehaviorType = typeof(IPipelineBehavior<,>);
     
     private static void ConfigureService(this OpenMediatRServiceConfiguration serviceConfiguration, Type type)
     {
         foreach (var interfaceType in type.GetInterfaces())
         {
-            if (serviceConfiguration.AutoRegisterRequestHandlers && type.ImplementsMediatR(RequestHandlerType) ||
-                serviceConfiguration.AutoRegisterNotificationHandlers && type.ImplementsMediatR(NotificationHandlerType))
+            if (!interfaceType.IsGenericType)
+                continue;
+
+            var genericDefinition = interfaceType.GetGenericTypeDefinition();
+
+            if (serviceConfiguration.AutoRegisterRequestHandlers && genericDefinition == RequestHandlerType ||
+                serviceConfiguration.AutoRegisterNotificationHandlers && genericDefinition == NotificationHandlerType)
             {
                 serviceConfiguration.Services.AddTransient(interfaceType, type);
                 continue;
             }
 
-            if (serviceConfiguration.AutoRegisterPipelineBehaviours && type.ImplementsMediatR(PipelineBehaviourType))
+            if (serviceConfiguration.AutoRegisterPipelineBehaviors && genericDefinition == PipelineBehaviorType)
             {
-                serviceConfiguration.Services.AddTransient(PipelineBehaviourType, type);
+                serviceConfiguration.Services.AddTransient(PipelineBehaviorType, type);
                 continue;
             }
         }

@@ -32,18 +32,18 @@ public class SenderTests
         // Arrange
 
         var handler = new TestHandler();
-        var pipeline1 = new TestPipelineBehaviour1<TestRequest, string>();
-        var pipeline2 = new TestPipelineBehaviour2<TestRequest, string>();
-        var pipeline3 = new TestPipelineBehaviour1<TestRequest, string>();
+        var pipeline1 = new TestPipelineBehavior1<TestRequest, string>();
+        var pipeline2 = new TestPipelineBehavior2<TestRequest, string>();
+        var pipeline3 = new TestPipelineBehavior1<TestRequest, string>();
         
         var services = new Mock<IServiceProvider>();
 
         services.Setup(x => x.GetService(typeof(IRequestHandler<TestRequest, string>)))
             .Returns(handler);
         
-        var pipelineServiceType = typeof(IEnumerable<>).MakeGenericType(typeof(IPipelineBehaviour<TestRequest, string>));
+        var pipelineServiceType = typeof(IEnumerable<>).MakeGenericType(typeof(IPipelineBehavior<TestRequest, string>));
         services.Setup(x => x.GetService(pipelineServiceType))
-            .Returns(new List<IPipelineBehaviour<TestRequest, string>>() { pipeline1, pipeline2, pipeline3 });
+            .Returns(new List<IPipelineBehavior<TestRequest, string>>() { pipeline1, pipeline2, pipeline3 });
         
         var sender = new OpenMediatRSender(services.Object);
         

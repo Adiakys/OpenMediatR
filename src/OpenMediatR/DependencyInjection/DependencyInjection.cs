@@ -6,25 +6,15 @@ namespace OpenMediatR;
 
 public static partial class DependencyInjection
 {
-    private static bool FirstConfig { get; set; } = false;
-    
     public static IServiceCollection AddOpenMediatR(this IServiceCollection services, Action<OpenMediatRServiceConfiguration> builder)
     {
-        if (FirstConfig is false)
-        {
-            
-            services.AddTransient<ISender, OpenMediatRSender>();
-            
-            services.AddTransient<IPublisher, OpenMediatRPublisher>();
-            services.AddTransient<INotificationSink, InAppNotificationSink>();
-            
-            services.AddTransient<IMediatR, MediatR>();
-            
-            FirstConfig = true;
-        }
-        
+        services.AddTransient<ISender, OpenMediatRSender>();
+        services.AddTransient<IPublisher, OpenMediatRPublisher>();
+        services.AddTransient<INotificationSink, InMemoryNotificationSink>();
+        services.AddTransient<IMediator, Mediator>();
+
         builder(new OpenMediatRServiceConfiguration(services));
-        
+
         return services;
     }
     
@@ -59,7 +49,7 @@ public static partial class DependencyInjection
         
         public bool AutoRegisterNotificationHandlers { get; set; } = true;
         
-        public bool AutoRegisterPipelineBehaviours { get; set; } = true;
+        public bool AutoRegisterPipelineBehaviors { get; set; } = true;
         
         internal IServiceCollection Services { get; private init; }
 
