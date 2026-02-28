@@ -208,6 +208,16 @@ services.AddOpenMediatR(cfg =>
 });
 ```
 
+## Roadmap
+
+Features not yet implemented compared to [MediatR](https://github.com/jbogard/MediatR):
+
+- [ ] `IStreamRequest<TResponse>` / `IStreamRequestHandler<TRequest, TResponse>` — streaming responses via `IAsyncEnumerable<T>`
+- [ ] `IRequestPreProcessor<TRequest>` — automatic pre-processing before handler execution
+- [ ] `IRequestPostProcessor<TRequest, TResponse>` — automatic post-processing after handler execution
+- [ ] `IRequestExceptionHandler<TRequest, TResponse, TException>` — structured exception handling with recovery
+- [ ] `IRequestExceptionAction<TRequest, TException>` — side-effects on exceptions (logging, metrics) without handling them
+
 ## License
 
 [Apache License 2.0](LICENSE)
