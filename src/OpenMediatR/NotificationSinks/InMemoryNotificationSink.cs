@@ -10,18 +10,20 @@ internal sealed class InMemoryNotificationSink : INotificationSink
     private static readonly ConcurrentDictionary<Type, NotificationMetadata> MetadataCache = new();
 
     private readonly IServiceProvider _services;
+    private readonly INotificationPublisher _publisher;
 
-    public InMemoryNotificationSink(IServiceProvider services)
+    public InMemoryNotificationSink(IServiceProvider services, INotificationPublisher publisher)
     {
         _services = services;
+        _publisher = publisher;
     }
 
-    public async Task Dispatch<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
+    public Task Dispatch<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
     {
         var metadata = GetOrCreateMetadata(notification!.GetType());
         var handlers = _services.GetServices(metadata.HandlerType);
 
-        foreach (var handler in handlers)
+        var handlerCalls = handlers.Select(handler => new Func<Task>(async () =>
         {
             try
             {
@@ -31,7 +33,9 @@ internal sealed class InMemoryNotificationSink : INotificationSink
             {
                 ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             }
-        }
+        }));
+
+        return _publisher.Publish(handlerCalls, cancellationToken);
     }
 
     private static NotificationMetadata GetOrCreateMetadata(Type notificationType)

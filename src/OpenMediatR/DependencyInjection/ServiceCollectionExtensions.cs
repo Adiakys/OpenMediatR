@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.TryAdd(new ServiceDescriptor(typeof(ISender), typeof(OpenMediatRSender), lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IPublisher), typeof(OpenMediatRPublisher), lifetime));
         services.TryAdd(new ServiceDescriptor(typeof(IMediator), typeof(Mediator), lifetime));
+        services.TryAdd(new ServiceDescriptor(typeof(INotificationPublisher), config.NotificationPublisherType, lifetime));
         services.TryAddEnumerable(ServiceDescriptor.Describe(
             typeof(INotificationSink), typeof(InMemoryNotificationSink), lifetime));
 

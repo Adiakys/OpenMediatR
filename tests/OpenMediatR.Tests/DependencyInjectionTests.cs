@@ -2,6 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using OpenMediatR.NotificationPublishers;
 using OpenMediatR.NotificationSinks;
 
 namespace OpenMediatR.Tests;
@@ -68,7 +69,22 @@ public sealed class DependencyInjectionTests
         services.Should().Contain(x => x.ServiceType == typeof(ISender) && x.ImplementationType == typeof(OpenMediatRSender));
         services.Should().Contain(x => x.ServiceType == typeof(IPublisher) && x.ImplementationType == typeof(OpenMediatRPublisher));
         services.Should().Contain(x => x.ServiceType == typeof(IMediator) && x.ImplementationType == typeof(Mediator));
+        services.Should().Contain(x => x.ServiceType == typeof(INotificationPublisher) && x.ImplementationType == typeof(ForeachAwaitPublisher));
         services.Should().Contain(x => x.ServiceType == typeof(INotificationSink) && x.ImplementationType == typeof(InMemoryNotificationSink));
+    }
+
+    [Fact]
+    public void AddOpenMediatR_WithCustomNotificationPublisher_ShouldRegisterIt()
+    {
+        var services = CreateServices(cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<DependencyInjectionTests>();
+            cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher);
+        });
+
+        services.Should().Contain(x =>
+            x.ServiceType == typeof(INotificationPublisher) &&
+            x.ImplementationType == typeof(TaskWhenAllPublisher));
     }
 
     [Fact]

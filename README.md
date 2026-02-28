@@ -51,6 +51,25 @@ public class UserController(ISender sender)
 
 Each request type must have exactly one handler. If no handler is registered, `Send` throws.
 
+For commands that return no value, use `IRequest` (without type parameter):
+
+```csharp
+public sealed record DeleteUser(int Id) : IRequest;
+
+public sealed class DeleteUserHandler : IRequestHandler<DeleteUser>
+{
+    public Task Handle(DeleteUser request, CancellationToken cancellationToken)
+    {
+        // delete the user
+        return Task.CompletedTask;
+    }
+}
+```
+
+```csharp
+await sender.Send(new DeleteUser(id));
+```
+
 ## Notifications
 
 Define a notification and one or more handlers:
@@ -183,6 +202,9 @@ services.AddOpenMediatR(cfg =>
 
     // Set service lifetime for core services (default: Transient)
     cfg.Lifetime = ServiceLifetime.Scoped;
+
+    // Notification publishing strategy (default: ForeachAwaitPublisher — sequential)
+    cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher); // parallel
 });
 ```
 

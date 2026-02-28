@@ -10,6 +10,13 @@ public sealed class OpenMediatRConfiguration
 
     public ServiceLifetime Lifetime { get; set; } = ServiceLifetime.Transient;
 
+    /// <summary>
+    /// The notification publisher type that determines how notification handlers are executed.
+    /// Defaults to <see cref="NotificationPublishers.ForeachAwaitPublisher"/> (sequential).
+    /// Use <see cref="NotificationPublishers.TaskWhenAllPublisher"/> for parallel execution.
+    /// </summary>
+    public Type NotificationPublisherType { get; set; } = typeof(NotificationPublishers.ForeachAwaitPublisher);
+
     public OpenMediatRConfiguration RegisterServicesFromAssemblyContaining<T>()
         => RegisterServicesFromAssembly(typeof(T).Assembly);
 
