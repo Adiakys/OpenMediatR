@@ -6,18 +6,6 @@ namespace OpenMediatR.Tests;
 public sealed class TypeExtensionsTests
 {
     [Fact]
-    public void ImplementsMediatR()
-    {
-        typeof(TestHandler).ImplementsMediatR(DependencyInjection.RequestHandlerType).Should().BeTrue();
-        typeof(TestHandler).ImplementsMediatR(DependencyInjection.NotificationHandlerType).Should().BeTrue();
-        typeof(TestPipelineBehavior1<,>).ImplementsMediatR(DependencyInjection.PipelineBehaviorType).Should().BeTrue();
-        
-        typeof(TestPipelineBehavior1<,>).ImplementsMediatR(DependencyInjection.RequestHandlerType).Should().BeFalse();
-        typeof(TestRequest).ImplementsMediatR(DependencyInjection.PipelineBehaviorType).Should().BeFalse();
-        typeof(string).ImplementsMediatR(DependencyInjection.PipelineBehaviorType).Should().BeFalse();
-    }
-
-    [Fact]
     public void GetServicesOrDefault_WhenNoServiceConfigured_ShouldReturnEmptyList()
     {
         var serviceCollection = new ServiceCollection();

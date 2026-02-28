@@ -12,7 +12,9 @@ public class DependencyInjectionTests
 
         services.AddOpenMediatR(cfg =>
         {
-            cfg.ConfigureServicesFromAssembly(typeof(DependencyInjectionTests).Assembly);
+            cfg.RegisterServicesFromAssemblyContaining<DependencyInjectionTests>();
+            cfg.AddOpenBehavior(typeof(TestPipelineBehavior1<,>));
+            cfg.AddOpenBehavior(typeof(TestPipelineBehavior2<,>));
         });
 
         services.FirstOrDefault(x =>
