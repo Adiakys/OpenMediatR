@@ -1,0 +1,91 @@
+using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace OpenMediatR.Tests;
+
+public sealed class IntegrationTests
+{
+    private static ServiceProvider BuildProvider(Action<OpenMediatRConfiguration>? configure = null)
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
+        services.AddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
+        services.AddOpenMediatR(configure ?? (cfg =>
+        {
+            cfg.RegisterServicesFromAssemblyContaining<IntegrationTests>();
+            cfg.AddOpenBehavior(typeof(TestPipelineBehavior1<,>));
+            cfg.AddOpenBehavior(typeof(TestPipelineBehavior2<,>));
+        }));
+        return services.BuildServiceProvider();
+    }
+
+    [Fact]
+    public async Task Send_WithRealDI_ShouldResolveHandlerAndReturnResult()
+    {
+        using var provider = BuildProvider(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<IntegrationTests>());
+
+        var sender = provider.GetRequiredService<ISender>();
+
+        var result = await sender.Send(new TestRequest());
+
+        result.Should().Be("Test");
+    }
+
+    [Fact]
+    public async Task Send_WithRealDI_ShouldExecutePipelineBehaviors()
+    {
+        using var provider = BuildProvider();
+
+        var sender = provider.GetRequiredService<ISender>();
+
+        var result = await sender.Send(new TestRequest());
+
+        result.Should().Be("Test");
+    }
+
+    [Fact]
+    public async Task Send_DifferentRequestTypes_ShouldResolveCorrectHandler()
+    {
+        using var provider = BuildProvider(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<IntegrationTests>());
+
+        var sender = provider.GetRequiredService<ISender>();
+
+        var stringResult = await sender.Send(new TestRequest());
+        var boolResult = await sender.Send(new TestRequest2(true));
+
+        stringResult.Should().Be("Test");
+        boolResult.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Publish_WithRealDI_ShouldDispatchToHandlers()
+    {
+        using var provider = BuildProvider(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<IntegrationTests>());
+
+        var publisher = provider.GetRequiredService<IPublisher>();
+
+        var act = () => publisher.Publish(new TestNotification());
+
+        await act.Should().NotThrowAsync();
+    }
+
+    [Fact]
+    public async Task Mediator_WithRealDI_ShouldDelegateSendAndPublish()
+    {
+        using var provider = BuildProvider(cfg =>
+            cfg.RegisterServicesFromAssemblyContaining<IntegrationTests>());
+
+        var mediator = provider.GetRequiredService<IMediator>();
+
+        var result = await mediator.Send(new TestRequest());
+        result.Should().Be("Test");
+
+        var act = () => mediator.Publish(new TestNotification());
+        await act.Should().NotThrowAsync();
+    }
+}
