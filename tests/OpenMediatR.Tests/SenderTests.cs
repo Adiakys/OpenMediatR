@@ -113,4 +113,41 @@ public sealed class SenderTests
 
         receivedToken.Should().Be(cts.Token);
     }
+
+    [Fact]
+    public async Task Send_VoidRequest_ShouldExecuteHandler()
+    {
+        var handler = new TestVoidHandler();
+        var services = new Mock<IServiceProvider>();
+        services.Setup(x => x.GetService(typeof(IRequestHandler<TestVoidRequest, Unit>)))
+            .Returns(handler);
+
+        var sender = new OpenMediatRSender(services.Object);
+
+        await sender.Send(new TestVoidRequest());
+
+        handler.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Send_VoidRequest_WithPipeline_ShouldExecuteBehaviorAndHandler()
+    {
+        var handler = new TestVoidHandler();
+        var pipeline = new TestPipelineBehavior1<TestVoidRequest, Unit>();
+
+        var services = new Mock<IServiceProvider>();
+        services.Setup(x => x.GetService(typeof(IRequestHandler<TestVoidRequest, Unit>)))
+            .Returns(handler);
+
+        var pipelineServiceType = typeof(IEnumerable<>).MakeGenericType(typeof(IPipelineBehavior<TestVoidRequest, Unit>));
+        services.Setup(x => x.GetService(pipelineServiceType))
+            .Returns(new List<IPipelineBehavior<TestVoidRequest, Unit>> { pipeline });
+
+        var sender = new OpenMediatRSender(services.Object);
+
+        await sender.Send(new TestVoidRequest());
+
+        handler.Count.Should().Be(1);
+        pipeline.Count.Should().Be(1);
+    }
 }

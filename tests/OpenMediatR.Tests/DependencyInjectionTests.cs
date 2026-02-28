@@ -106,6 +106,16 @@ public sealed class DependencyInjectionTests
     }
 
     [Fact]
+    public void AddOpenMediatR_ShouldRegisterVoidRequestHandlersFromAssembly()
+    {
+        var services = CreateServices();
+
+        services.Should().Contain(x =>
+            x.ServiceType == typeof(IRequestHandler<TestVoidRequest, Unit>) &&
+            x.ImplementationType == typeof(TestVoidHandler));
+    }
+
+    [Fact]
     public void AddOpenMediatR_ShouldNotRegisterNonMediatRInterfaces()
     {
         var services = CreateServices();
