@@ -1,14 +1,17 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace OpenMediatR;
 
 internal sealed class OpenMediatRPublisher : IPublisher
 {
     private readonly IServiceProvider _services;
+    private readonly ILogger<OpenMediatRPublisher> _logger;
 
-    public OpenMediatRPublisher(IServiceProvider services)
+    public OpenMediatRPublisher(IServiceProvider services, ILogger<OpenMediatRPublisher> logger)
     {
         _services = services;
+        _logger = logger;
     }
 
     public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
@@ -17,7 +20,15 @@ internal sealed class OpenMediatRPublisher : IPublisher
 
         foreach (var sink in sinks)
         {
-            await sink.Publish(notification, cancellationToken);
+            try
+            {
+                await sink.Dispatch(notification, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Notification sink {SinkType} failed while dispatching {NotificationType}",
+                    sink.GetType().Name, typeof(TNotification).Name);
+            }
         }
     }
 }

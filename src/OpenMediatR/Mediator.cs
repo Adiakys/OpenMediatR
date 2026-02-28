@@ -1,28 +1,23 @@
-using Microsoft.Extensions.DependencyInjection;
-
 namespace OpenMediatR;
 
-internal sealed class MediatR : IMediatR
+internal sealed class Mediator : IMediator
 {
-    private ISender? _sender;
-    private IPublisher? _publisher;
-    
-    private readonly IServiceProvider _services;
+    private readonly ISender _sender;
+    private readonly IPublisher _publisher;
 
-    public MediatR(IServiceProvider services)
+    public Mediator(ISender sender, IPublisher publisher)
     {
-        _services = services;
+        _sender = sender;
+        _publisher = publisher;
     }
 
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
-        _sender ??= _services.GetRequiredService<ISender>();
         return _sender.Send(request, cancellationToken);
     }
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default) where TNotification : INotification
     {
-        _publisher ??= _services.GetRequiredService<IPublisher>();
         return _publisher.Publish(notification, cancellationToken);
     }
 }

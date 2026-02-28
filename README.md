@@ -1,110 +1,223 @@
 # OpenMediatR
 
-**OpenMediatR** is a lightweight, open-source alternative to the popular [MediatR](https://github.com/jbogard/MediatR) library. It provides simple in-process messaging with support for `IRequest`/`IRequestHandler` and `INotification`/`INotificationHandler` patterns, aiming for clarity, minimalism, and zero external dependencies.
+A lightweight, free, in-process mediator for .NET. Implements the mediator pattern with support for requests, notifications, pipeline behaviors, and pluggable notification sinks.
 
-> ⚠️ **Preview Version:** This is version `0.0.2`, an early preview release intended for testing and feedback. APIs and structure may change.
+## Installation
 
-![OpenMediatR](icon.png)
+```
+dotnet add package OpenMediatR
+```
 
----
+## Setup
 
-## 🧩 Why "OpenMediatR"?
-
-Because messaging should be simple, open, and yours to control — without magic, and without cost.
-
----
-
-## ✨ Features
-
-- ✅ Clean, minimal abstraction layer
-- ✅ Zero external dependencies
-- ✅ Simple integration with .NET DI
-- ✅ Clear separation of contracts and implementation
-- ✅ Unit-test friendly architecture
-- ✅ Familiar `IRequest`, `IRequestHandler`, and `ISender` patterns
-
----
-
-## 🧠 How It Works
-
-
-### Requests
+Register OpenMediatR in your DI container:
 
 ```csharp
-// Define a request
-public class Ping : IRequest<string> { }
-
-// Implement a handler
-public class PingHandler : IRequestHandler<Ping, string>
+services.AddOpenMediatR(cfg =>
 {
-    public Task<string> Handle(Ping request, CancellationToken cancellationToken)
-        => Task.FromResult("Pong");
+    cfg.RegisterServicesFromAssemblyContaining<MyRequestHandler>();
+});
+```
+
+This scans the specified assembly for `IRequestHandler<,>` and `INotificationHandler<>` implementations and registers them automatically.
+
+## Requests
+
+Define a request and its handler:
+
+```csharp
+public sealed record GetUser(int Id) : IRequest<User>;
+
+public sealed class GetUserHandler : IRequestHandler<GetUser, User>
+{
+    public Task<User> Handle(GetUser request, CancellationToken cancellationToken)
+    {
+        // resolve and return the user
+    }
 }
 ```
 
-### Notifications
+Dispatch it via `ISender`:
 
 ```csharp
-// Define a notification
-public class Alert : INotification
+public class UserController(ISender sender)
 {
-    public string Message { get; set; }
-}
-
-// Implement a handler
-public class AlertHandler : INotificationHandler<Alert>
-{
-    public Task Handle(Alert notification, CancellationToken cancellationToken)
+    public async Task<User> Get(int id)
     {
-        Console.WriteLine(notification.Message);
+        return await sender.Send(new GetUser(id));
+    }
+}
+```
+
+Each request type must have exactly one handler. If no handler is registered, `Send` throws.
+
+For commands that return no value, use `IRequest` (without type parameter):
+
+```csharp
+public sealed record DeleteUser(int Id) : IRequest;
+
+public sealed class DeleteUserHandler : IRequestHandler<DeleteUser>
+{
+    public Task Handle(DeleteUser request, CancellationToken cancellationToken)
+    {
+        // delete the user
         return Task.CompletedTask;
     }
 }
 ```
 
-### Dispatching
+```csharp
+await sender.Send(new DeleteUser(id));
+```
+
+## Notifications
+
+Define a notification and one or more handlers:
 
 ```csharp
-public class SomeService
+public sealed record OrderPlaced(int OrderId) : INotification;
+
+public sealed class SendConfirmationEmail : INotificationHandler<OrderPlaced>
 {
-    private readonly ISender _sender;
-    private readonly IPublisher _publisher;
-
-    public SomeService(ISender sender, IPublisher publisher)
+    public Task Handle(OrderPlaced notification, CancellationToken cancellationToken)
     {
-        _sender = sender;
-        _publisher = publisher;
+        // send email
+        return Task.CompletedTask;
     }
+}
 
-    public async Task Run()
+public sealed class UpdateInventory : INotificationHandler<OrderPlaced>
+{
+    public Task Handle(OrderPlaced notification, CancellationToken cancellationToken)
     {
-        var response = await _sender.Send(new Ping());
-        Console.WriteLine(response); // "Pong"
-
-        await _publisher.Publish(new Alert { Message = "Something happened!" });
+        // update stock
+        return Task.CompletedTask;
     }
 }
 ```
 
----
+Publish via `IPublisher`:
 
-## 📌 Roadmap
+```csharp
+await publisher.Publish(new OrderPlaced(orderId));
+```
 
-- [x] Notification support (`INotification`)
-- [x] Pipeline behaviors (`IPipelineBehaviuor<,>`)
-- [ ] Request validators (`IRequestValidator<>`)
-- [ ] Custom behaviors and decorators
-- [ ] NuGet packaging and CI/CD
-- [ ] Performance benchmarks
+All registered handlers for the notification type are executed. Multiple handlers per notification type are supported.
 
----
+## Pipeline Behaviors
 
-## 🤝 Contributing
+Pipeline behaviors wrap request handling, similar to middleware. They execute in registration order.
 
-OpenMediatR is in its infancy — contributions, ideas, and issues are all welcome! Feel free to fork, raise issues, or suggest enhancements.
+```csharp
+public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
+{
+    public async Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken)
+    {
+        Console.WriteLine($"Handling {typeof(TRequest).Name}");
+        var response = await next();
+        Console.WriteLine($"Handled {typeof(TRequest).Name}");
+        return response;
+    }
+}
+```
 
----
+Register behaviors explicitly via `AddOpenBehavior`:
 
-## 📄 License
+```csharp
+services.AddOpenMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<MyRequestHandler>();
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
+```
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+Behaviors are not auto-scanned. They must be open generic types implementing `IPipelineBehavior<,>`.
+
+## Notification Sinks
+
+Notifications are dispatched through notification sinks. A sink determines how notifications reach their handlers.
+
+The built-in `InMemoryNotificationSink` resolves `INotificationHandler<T>` from DI and invokes them in-process. It is registered by default.
+
+You can add custom sinks for other delivery channels (message brokers, webhooks, etc.) by implementing `INotificationSink`:
+
+```csharp
+public sealed class WebhookNotificationSink : INotificationSink
+{
+    public async Task Dispatch<TNotification>(
+        TNotification notification,
+        CancellationToken cancellationToken) where TNotification : INotification
+    {
+        // forward to external webhook
+    }
+}
+```
+
+Register it in DI:
+
+```csharp
+services.AddSingleton<INotificationSink, WebhookNotificationSink>();
+```
+
+The publisher fans out to all registered sinks sequentially. If a sink throws, the exception is logged and remaining sinks still execute.
+
+## IMediator
+
+`IMediator` combines both `ISender` and `IPublisher` into a single interface:
+
+```csharp
+public class OrderService(IMediator mediator)
+{
+    public async Task PlaceOrder(Order order)
+    {
+        var result = await mediator.Send(new CreateOrder(order));
+        await mediator.Publish(new OrderPlaced(result.Id));
+    }
+}
+```
+
+You can inject `ISender`, `IPublisher`, or `IMediator` depending on what the consumer needs.
+
+## Configuration
+
+```csharp
+services.AddOpenMediatR(cfg =>
+{
+    // Scan multiple assemblies
+    cfg.RegisterServicesFromAssembly(typeof(HandlerA).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(HandlerB).Assembly);
+    // or: cfg.RegisterServicesFromAssemblies(assembly1, assembly2);
+
+    // Add pipeline behaviors (in execution order)
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+
+    // Override behavior lifetime
+    cfg.AddOpenBehavior(typeof(CachingBehavior<,>), ServiceLifetime.Singleton);
+
+    // Set service lifetime for core services (default: Transient)
+    cfg.Lifetime = ServiceLifetime.Scoped;
+
+    // Notification publishing strategy (default: ForeachAwaitPublisher — sequential)
+    cfg.NotificationPublisherType = typeof(TaskWhenAllPublisher); // parallel
+});
+```
+
+## Roadmap
+
+Features not yet implemented compared to [MediatR](https://github.com/jbogard/MediatR):
+
+- [ ] `IStreamRequest<TResponse>` / `IStreamRequestHandler<TRequest, TResponse>` — streaming responses via `IAsyncEnumerable<T>`
+- [ ] `IRequestPreProcessor<TRequest>` — automatic pre-processing before handler execution
+- [ ] `IRequestPostProcessor<TRequest, TResponse>` — automatic post-processing after handler execution
+- [ ] `IRequestExceptionHandler<TRequest, TResponse, TException>` — structured exception handling with recovery
+- [ ] `IRequestExceptionAction<TRequest, TException>` — side-effects on exceptions (logging, metrics) without handling them
+
+## License
+
+[Apache License 2.0](LICENSE)

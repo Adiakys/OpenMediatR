@@ -1,6 +1,6 @@
 namespace OpenMediatR.Tests;
 
-internal sealed class TestPipelineBehaviour2<TRequest, TResponse> : IPipelineBehaviour<TRequest, TResponse>
+internal sealed class TestPipelineBehavior1<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     public int Count { get; private set; } = 0;
@@ -8,6 +8,6 @@ internal sealed class TestPipelineBehaviour2<TRequest, TResponse> : IPipelineBeh
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         Count++;
-        return next(cancellationToken);
+        return next();
     }
 }
