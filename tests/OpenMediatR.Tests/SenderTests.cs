@@ -115,6 +115,34 @@ public sealed class SenderTests
     }
 
     [Fact]
+    public async Task Send_WithPipeline_ShouldPassCancellationTokenToHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        CancellationToken receivedToken = default;
+
+        var handler = new Mock<IRequestHandler<TestRequest, string>>();
+        handler.Setup(x => x.Handle(It.IsAny<TestRequest>(), It.IsAny<CancellationToken>()))
+            .Callback<TestRequest, CancellationToken>((_, ct) => receivedToken = ct)
+            .ReturnsAsync("ok");
+
+        var pipeline = new TestPipelineBehavior1<TestRequest, string>();
+
+        var services = new Mock<IServiceProvider>();
+        services.Setup(x => x.GetService(typeof(IRequestHandler<TestRequest, string>)))
+            .Returns(handler.Object);
+
+        var pipelineServiceType = typeof(IEnumerable<>).MakeGenericType(typeof(IPipelineBehavior<TestRequest, string>));
+        services.Setup(x => x.GetService(pipelineServiceType))
+            .Returns(new List<IPipelineBehavior<TestRequest, string>> { pipeline });
+
+        var sender = new OpenMediatRSender(services.Object);
+
+        await sender.Send(new TestRequest(), cts.Token);
+
+        receivedToken.Should().Be(cts.Token);
+    }
+
+    [Fact]
     public async Task Send_VoidRequest_ShouldExecuteHandler()
     {
         var handler = new TestVoidHandler();

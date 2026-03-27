@@ -1,6 +1,6 @@
 namespace OpenMediatR;
 
-public delegate Task<TResponse> RequestHandlerDelegate<TResponse>();
+public delegate Task<TResponse> RequestHandlerDelegate<TResponse>(CancellationToken cancellationToken);
 
 public interface IPipelineBehavior<in TRequest, TResponse>
     where TRequest : IRequest<TResponse>

@@ -19,9 +19,9 @@ internal sealed class OpenMediatRSender : ISender
     public Task<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
     {
         var metadata = GetOrCreateMetadata(request.GetType());
-        RequestHandlerDelegate<TResponse> next = () => Handle(request, metadata, cancellationToken);
-        next = ConfigurePipeline(request, metadata, next, cancellationToken);
-        return next();
+        RequestHandlerDelegate<TResponse> next = (ct) => Handle(request, metadata, ct);
+        next = ConfigurePipeline(request, metadata, next);
+        return next(cancellationToken);
     }
 
     private Task<TResponse> Handle<TResponse>(IRequest<TResponse> request, RequestMetadata metadata, CancellationToken cancellationToken)
@@ -41,19 +41,18 @@ internal sealed class OpenMediatRSender : ISender
     private RequestHandlerDelegate<TResponse> ConfigurePipeline<TResponse>(
         IRequest<TResponse> request,
         RequestMetadata metadata,
-        RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken)
+        RequestHandlerDelegate<TResponse> next)
     {
         var pipelines = _services.GetServicesOrDefault(metadata.PipelineType);
 
         foreach (var pipeline in pipelines)
         {
             var currentNext = next;
-            next = () =>
+            next = (ct) =>
             {
                 try
                 {
-                    var result = metadata.PipelineMethod.Invoke(pipeline, [request, currentNext, cancellationToken]);
+                    var result = metadata.PipelineMethod.Invoke(pipeline, [request, currentNext, ct]);
                     return (Task<TResponse>)result!;
                 }
                 catch (TargetInvocationException ex) when (ex.InnerException is not null)
