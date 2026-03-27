@@ -32,19 +32,19 @@ public sealed class BenchmarkPipelineBehavior<TRequest, TResponse> : IPipelineBe
     where TRequest : IRequest<TResponse>
 {
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
-        => next();
+        => next(cancellationToken);
 }
 
 public sealed class BenchmarkPipelineBehavior2<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
-        => next();
+        => next(cancellationToken);
 }
 
 public sealed class BenchmarkPipelineBehavior3<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
-        => next();
+        => next(cancellationToken);
 }

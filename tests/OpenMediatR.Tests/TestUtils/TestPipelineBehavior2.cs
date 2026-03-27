@@ -8,6 +8,6 @@ internal sealed class TestPipelineBehavior2<TRequest, TResponse> : IPipelineBeha
     public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         Count++;
-        return next();
+        return next(cancellationToken);
     }
 }
