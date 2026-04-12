@@ -3,7 +3,7 @@
         <!-- NuGet Package Info -->
         <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
         <PackageId>$(MSBuildProjectName)</PackageId>
-        <Version>1.0.0-beta.2</Version>
+        <Version>1.0.0</Version>
         <Authors>Andrea Ficarra</Authors>
         <Copyright>Copyright © 2026 Andrea Ficarra</Copyright>
         <Description>Lightweight, free, open-source in-process mediator for .NET. Supports requests, notifications, pipeline behaviors, and pluggable notification sinks.</Description>
@@ -11,7 +11,7 @@
         <RepositoryUrl>https://github.com/Adiakys/OpenMediatR</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-        <PackageReleaseNotes>First public beta: requests, notifications, pipeline behaviors, notification sinks, publishing strategies.</PackageReleaseNotes>
+        <PackageReleaseNotes>First release: requests, notifications, pipeline behaviors, notification sinks, publishing strategies.</PackageReleaseNotes>
         <PackageTags>mediator;cqrs;pipeline;notifications;request-response;messaging;dotnet;open-source</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>

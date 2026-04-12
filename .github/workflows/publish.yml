@@ -1,0 +1,55 @@
+name: Publish NuGet Packages
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build --output ./nupkgs
+
+      - name: Push to GitHub Packages
+        run: |
+          dotnet nuget push "./nupkgs/*.nupkg" \
+            --source "https://nuget.pkg.github.com/Adiakys/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+          dotnet nuget push "./nupkgs/*.snupkg" \
+            --source "https://nuget.pkg.github.com/Adiakys/index.json" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
+            --skip-duplicate
+
+      - name: Push to NuGet.org
+        run: |
+          dotnet nuget push "./nupkgs/*.nupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
+          dotnet nuget push "./nupkgs/*.snupkg" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --skip-duplicate
