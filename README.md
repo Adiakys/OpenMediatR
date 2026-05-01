@@ -220,4 +220,4 @@ Features not yet implemented compared to [MediatR](https://github.com/jbogard/Me
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[GPLv3](LICENSE)
